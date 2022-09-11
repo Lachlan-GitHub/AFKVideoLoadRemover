@@ -1,0 +1,9 @@
+loadingFrameCount | buffer
+--------------------------------------
+13187				no buffer
+
+13171 				buffer 10
+
+13138 				buffer 30
+
+13108 				buffer 60, 90
