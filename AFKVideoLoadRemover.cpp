@@ -7,10 +7,10 @@ using namespace cv;
 int main()
 {
     //Loading sources
-    VideoCapture video("D:/speedrun.mp4");                      //Video to remove loads on
-    VideoCapture loadingMain("720p_MAIN.png");                  //'Loading...' from the main load screen
-    VideoCapture loadingProvingEntry("720p_ENTER_PROVING.png"); //'Loading...' from the Proving entrance load screen
-    VideoCapture loadingProvingExit("720p_EXIT_PROVING.png");   //'Loading...' from the Proving exit load screen
+    VideoCapture video("D:/speedrun_1080p_60fps.mp4");                      //Video to remove loads on
+    VideoCapture loadingMain("1080p_MAIN.png");                  //'Loading...' from the main load screen
+    VideoCapture loadingProvingEntry("1080p_ENTER_PROVING.png"); //'Loading...' from the Proving entrance load screen
+    VideoCapture loadingProvingExit("1080p_EXIT_PROVING.png");   //'Loading...' from the Proving exit load screen
 
     //Creating frames
     Mat videoFrame, videoFrameCrop;                                             //Frame from the video and a cropped frame that targets the 'loading...' in videoFrame
@@ -30,7 +30,7 @@ int main()
         //Get frame, check if it exists, and then crop it to the positon of 'Loading...'
         video >> videoFrame;
         if (videoFrame.empty()) break;
-        videoFrameCrop = videoFrame(cv::Rect(64, 649, 81, 19));
+        videoFrameCrop = videoFrame(cv::Rect(98, 975, 116, 26));
 
         //Get the absolute difference of each compared pixel
         absdiff(videoFrameCrop, loadingMainFrame, differenceMain);
@@ -42,8 +42,8 @@ int main()
         minMaxLoc(differenceProvingEntry, NULL, &maxValProvingEntry);
         minMaxLoc(differenceProvingExit, NULL, &maxValProvingExit);
 
-        //If a pixel has a large difference, then it is most likely not a load screen. We start incrementing our frame count after 90 load screen frames
-        if (maxValMain < 60 || maxValProvingEntry < 60 || maxValProvingExit < 60)
+        //If a pixel has a large difference, then it is most likely not a load screen. We start incrementing our frame count after 60 load screen frames
+        if (maxValMain < 100 || maxValProvingEntry < 100 || maxValProvingExit < 100)
         {
             loadScreenBuffer++;
             if (loadScreenBuffer == 60)
@@ -68,7 +68,7 @@ int main()
     }
 
     //Result formatting and printing
-    int frameRate = 30;
+    int frameRate = 60;
     int seconds = loadingFrameCount / frameRate;
     int secondsRemainder = seconds % 60;
     int minutes = seconds / 60;
@@ -79,6 +79,9 @@ int main()
 
     //Deletions
     video.release();
+    loadingMain.release();
+    loadingProvingEntry.release();
+    loadingProvingExit.release();
     destroyAllWindows();
 
     return 0;
