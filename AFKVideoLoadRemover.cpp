@@ -16,9 +16,16 @@ int main()
     Mat videoFrame, videoFrameCrop;                                             //Frame from the video and a cropped frame that targets the 'loading...' in videoFrame
     Mat loadingMainFrame, loadingProvingEntryFrame, loadingProvingExitFrame;    //These are the cropped frames that the video compares against. They contain the 'Loading...' in each of the 3 different load screens
     Mat differenceMain, differenceProvingEntry, differenceProvingExit;          //Each of these are layered over their respective frame, in the line above, to find similarity
+
+    //Data for determining load screens
     int loadScreenBuffer = 0;                                                   //Once 60 frames in a row are found to be load screens, we can start incrementing loadingFrameCount
     double loadingFrameCount = 0;                                               //Increments each time a frame is determined to be a load screen
     double maxValMain, maxValProvingEntry, maxValProvingExit;                   //Stores numbers between 0-255. The lower the number, the greater the chance of currently compared frames being a load screen.
+
+    //Data for progress updates
+    int currentFrameCount = 0;
+    int totalFrameCount = video.get(7);
+    double completionPercentage = 0;
 
     //Load the cropped 'Loading...' images into frames for use
     loadingMain >> loadingMainFrame;
@@ -49,6 +56,11 @@ int main()
             if (loadScreenBuffer == 60)
             {
                 loadingFrameCount += 60;
+
+                //Progress updates that only occur once every load screen
+                currentFrameCount = video.get(1);
+                completionPercentage = currentFrameCount / (totalFrameCount / 100);
+                cout << completionPercentage << "%" << endl;
             }
             else if (loadScreenBuffer > 60)
             {
@@ -59,7 +71,7 @@ int main()
         {
             loadScreenBuffer = 0;
         }
-        
+
         //Uncomment this code to have the video play alongside the maxVals for testing
         //imshow("", videoFrame);
         //char c = (char) waitKey(1);
@@ -68,13 +80,13 @@ int main()
     }
 
     //Result formatting and printing
-    int frameRate = 60;
+    int frameRate = video.get(5);
     int seconds = loadingFrameCount / frameRate;
     int secondsRemainder = seconds % 60;
     int minutes = seconds / 60;
     cout << "--------------------------------------------------------------------------" << endl;
     cout << "Load frames: " << loadingFrameCount << endl;
-    cout << minutes << "m " << secondsRemainder << "s of load screens" << endl;
+    cout << minutes << "m " << seconds << "s of load screens" << endl;
     cout << "--------------------------------------------------------------------------" << endl;
 
     //Deletions
