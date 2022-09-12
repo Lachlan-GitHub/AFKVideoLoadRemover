@@ -87,7 +87,7 @@ int main()
     int minutes = seconds / 60;
     cout << "--------------------------------------------------------------------------" << endl;
     cout << "Load frames: " << loadingFrameCount << endl;
-    cout << minutes << "m " << seconds << "s of load screens" << endl;
+    cout << minutes << "m " << secondsRemainder << "s of load screens" << endl;
     cout << "--------------------------------------------------------------------------" << endl;
 
     //Deletions
