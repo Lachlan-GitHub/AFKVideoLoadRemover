@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include "opencv2\highgui\highgui.hpp"
 
 using namespace std;
@@ -7,10 +8,10 @@ using namespace cv;
 int main()
 {
     //Loading sources
-    VideoCapture video("D:/speedrun_1080p_60fps.mp4");                      //Video to remove loads on
-    VideoCapture loadingMain("1080p_MAIN.png");                  //'Loading...' from the main load screen
-    VideoCapture loadingProvingEntry("1080p_ENTER_PROVING.png"); //'Loading...' from the Proving entrance load screen
-    VideoCapture loadingProvingExit("1080p_EXIT_PROVING.png");   //'Loading...' from the Proving exit load screen
+    VideoCapture video("D:/speedrun_1080p_60fps.mp4");                          //Video to remove loads on
+    VideoCapture loadingMain("1080p_MAIN.png");                                 //'Loading...' from the main load screen
+    VideoCapture loadingProvingEntry("1080p_ENTER_PROVING.png");                //'Loading...' from the Proving entrance load screen
+    VideoCapture loadingProvingExit("1080p_EXIT_PROVING.png");                  //'Loading...' from the Proving exit load screen
 
     //Creating frames
     Mat videoFrame, videoFrameCrop;                                             //Frame from the video and a cropped frame that targets the 'loading...' in videoFrame
@@ -23,9 +24,9 @@ int main()
     double maxValMain, maxValProvingEntry, maxValProvingExit;                   //Stores numbers between 0-255. The lower the number, the greater the chance of currently compared frames being a load screen.
 
     //Data for progress updates
-    int currentFrameCount = 0;
-    int totalFrameCount = video.get(7);
-    double completionPercentage = 0;
+    int currentFrameCount = 0;                                                  //Stores the index of the current frame
+    int totalFrameCount = video.get(7);                                         //Total framecount of video
+    int completionPercentage = 0;                                               //Stores the percentage of completion
 
     //Load the cropped 'Loading...' images into frames for use
     loadingMain >> loadingMainFrame;
