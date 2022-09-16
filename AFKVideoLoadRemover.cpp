@@ -7,8 +7,10 @@ using namespace cv;
 
 int main()
 {
+    bool DEBUG_MODE = true;
+
     //Loading sources
-    VideoCapture video("D:/speedrun_1080p_60fps.mp4");                          //Video to remove loads on
+    VideoCapture video("D:/Videos/LoadRemover/speedrun_1080p_60fps.mp4");       //Video to remove loads on
     VideoCapture loadingMain("1080p_MAIN.png");                                 //'Loading...' from the main load screen
     VideoCapture loadingProvingEntry("1080p_ENTER_PROVING.png");                //'Loading...' from the Proving entrance load screen
     VideoCapture loadingProvingExit("1080p_EXIT_PROVING.png");                  //'Loading...' from the Proving exit load screen
@@ -53,6 +55,11 @@ int main()
         //If a pixel has a large difference, then it is most likely not a load screen. We start incrementing our frame count after 60 load screen frames
         if (maxValMain < 100 || maxValProvingEntry < 100 || maxValProvingExit < 100)
         {
+            if (DEBUG_MODE)
+            {
+                cout << "LOAD FRAME " << loadingFrameCount <<endl;
+            }
+
             loadScreenBuffer++;
             if (loadScreenBuffer == 60)
             {
@@ -73,11 +80,21 @@ int main()
             loadScreenBuffer = 0;
         }
 
-        //Uncomment this code to have the video play alongside the maxVals for testing
-        //imshow("", videoFrame);
-        //char c = (char) waitKey(1);
-        //if (c == 27) break;
-        //cout << maxValMain << " " << maxValProvingEntry << " " << maxValProvingExit << endl;
+        if (DEBUG_MODE)
+        {
+            imshow("", videoFrame);
+            char c = (char) waitKey(1);
+            if (c == 27)
+            {
+                break;
+            }
+            else if (c == 'p')
+            {
+                while (c != 'p');
+            }
+            //cout << maxValMain << " " << maxValProvingEntry << " " << maxValProvingExit << endl;
+        }
+
     }
 
     //Result formatting and printing
