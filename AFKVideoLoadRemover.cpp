@@ -83,14 +83,14 @@ int main()
         if (DEBUG_MODE)
         {
             imshow("", videoFrame);
-            char c = (char) waitKey(1);
+            char c = waitKey(1);
             if (c == 27)
             {
                 break;
             }
             else if (c == 'p')
             {
-                while (c != 'p');
+                while (waitKey(1) != 'p');
             }
             //cout << maxValMain << " " << maxValProvingEntry << " " << maxValProvingExit << endl;
         }
