@@ -7,7 +7,8 @@ using namespace cv;
 
 int main()
 {
-    bool DEBUG_MODE = true;
+    //Debug mode
+    bool DEBUG_MODE = true;                                                     //Setting this to true will allow you to see the video play alongside an ouput to see what it detects as a load
 
     //Loading sources
     VideoCapture video("D:/Videos/LoadRemover/speedrun_1080p_60fps.mp4");       //Video to remove loads on
@@ -21,7 +22,7 @@ int main()
     Mat differenceMain, differenceProvingEntry, differenceProvingExit;          //Each of these are layered over their respective frame, in the line above, to find similarity
 
     //Data for determining load screens
-    int loadScreenBuffer = 0;                                                   //Once 60 frames in a row are found to be load screens, we can start incrementing loadingFrameCount
+    int loadScreenBuffer = 0;                                                   //Once 60 frames in a row are found to be load screens, we add 60 to loadingFrameCount and start incrementing it for each load screen frame after. Buffer is reset when a non-load frame is encountered
     double loadingFrameCount = 0;                                               //Increments each time a frame is determined to be a load screen
     double maxValMain, maxValProvingEntry, maxValProvingExit;                   //Stores numbers between 0-255. The lower the number, the greater the chance of currently compared frames being a load screen.
 
@@ -55,6 +56,7 @@ int main()
         //If a pixel has a large difference, then it is most likely not a load screen. We start incrementing our frame count after 60 load screen frames
         if (maxValMain < 100 || maxValProvingEntry < 100 || maxValProvingExit < 100)
         {
+            //Debug: Output when a load is detected
             if (DEBUG_MODE)
             {
                 cout << "LOAD FRAME " << loadingFrameCount <<endl;
@@ -80,6 +82,7 @@ int main()
             loadScreenBuffer = 0;
         }
 
+        //Debug: Play video and allow pauses
         if (DEBUG_MODE)
         {
             imshow("", videoFrame);
