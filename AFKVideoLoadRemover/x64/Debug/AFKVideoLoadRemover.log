@@ -1,6 +1,2 @@
-﻿  AFKVideoLoadRemover.cpp
-D:\Coding\AFKVideoLoadRemover\AFKVideoLoadRemover\AFKVideoLoadRemover.cpp(21,25): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-D:\Coding\AFKVideoLoadRemover\AFKVideoLoadRemover\AFKVideoLoadRemover.cpp(47,42): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-D:\Coding\AFKVideoLoadRemover\AFKVideoLoadRemover\AFKVideoLoadRemover.cpp(56,19): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-D:\Coding\AFKVideoLoadRemover\AFKVideoLoadRemover\AFKVideoLoadRemover.cpp(57,22): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+﻿  LINK : D:\Coding\AFKVideoLoadRemover\x64\Debug\AFKVideoLoadRemover.exe not found or not built by the last incremental link; performing full link
   AFKVideoLoadRemover.vcxproj -> D:\Coding\AFKVideoLoadRemover\x64\Debug\AFKVideoLoadRemover.exe
