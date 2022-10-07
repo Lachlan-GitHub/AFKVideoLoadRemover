@@ -1,5 +1,3 @@
-*.opendb
-*.ipch
-opencv_world460d.dll
 .vs/
 x64/
+AFKVideoLoadRemover/x64/
