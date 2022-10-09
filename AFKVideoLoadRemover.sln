@@ -5,6 +5,8 @@ VisualStudioVersion = 17.3.32922.545
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AFKVideoLoadRemover", "AFKVideoLoadRemover\AFKVideoLoadRemover.vcxproj", "{5832F946-2F09-4FC2-AB1A-39F8B4474C8D}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "AFKVLR", "AFKVLR\AFKVLR.vdproj", "{B7B9ABCA-55B0-4F45-9675-4B841E354ABD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,11 @@ Global
 		{5832F946-2F09-4FC2-AB1A-39F8B4474C8D}.Release|x64.Build.0 = Release|x64
 		{5832F946-2F09-4FC2-AB1A-39F8B4474C8D}.Release|x86.ActiveCfg = Release|Win32
 		{5832F946-2F09-4FC2-AB1A-39F8B4474C8D}.Release|x86.Build.0 = Release|Win32
+		{B7B9ABCA-55B0-4F45-9675-4B841E354ABD}.Debug|x64.ActiveCfg = Debug
+		{B7B9ABCA-55B0-4F45-9675-4B841E354ABD}.Debug|x86.ActiveCfg = Debug
+		{B7B9ABCA-55B0-4F45-9675-4B841E354ABD}.Release|x64.ActiveCfg = Release
+		{B7B9ABCA-55B0-4F45-9675-4B841E354ABD}.Release|x64.Build.0 = Release
+		{B7B9ABCA-55B0-4F45-9675-4B841E354ABD}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
