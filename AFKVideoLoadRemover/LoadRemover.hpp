@@ -7,7 +7,7 @@ class LoadRemover
 {
 public:
 	void begin();
-	void generateVideoAndFrames();
+	void startSetup();
 	void promptDebugMode();
 	void iterateFrames();
 	void printPercentageDone();
@@ -17,13 +17,14 @@ private:
 	bool debugMode;
 	bool lastFrameWasLoad;
 	cv::VideoCapture video;
-	std::vector<cv::VideoCapture> loadPatterns;
-	std::vector<double> maxVals;
 	std::vector<cv::Mat> loadFrameCrops;
 	std::vector<cv::Mat> framesForDifference;
+	std::vector<double> maxVals;
 	cv::Mat videoFrame;
 	cv::Mat videoFrameCrop;
+	int uniqueLoadScreenCount;
 	int loadingFrameCount;
+	int framerate;
 	int totalFrameCount;
 	int completionPercentage;
 };

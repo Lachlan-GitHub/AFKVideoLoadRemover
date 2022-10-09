@@ -6,34 +6,76 @@
 
 void LoadRemover::begin()
 {
-    generateVideoAndFrames();
+    startSetup();
     promptDebugMode();
     iterateFrames();
     printResultsAndDeleteVideos();
 }
 
-void LoadRemover::generateVideoAndFrames()
+void LoadRemover::startSetup()
 {
-    video = cv::VideoCapture("D:/Videos/LoadRemover/speedrun_720p_30fps.mp4");
-    loadPatterns.push_back(cv::VideoCapture("images/720p_MAIN.png"));
-    loadPatterns.push_back(cv::VideoCapture("images/720p_ENTER_PROVING.png"));
-    loadPatterns.push_back(cv::VideoCapture("images/720p_EXIT_PROVING.png"));
+    std::string userInput;
 
+    std::cout << "Currently only supports 720p videos. Use a 60fps recording for better accuracy." << std::endl;
+    std::cout << "Enter the location of your video file (Example: 'D:\\Videos\\LoadRemover\\speedrun.mp4'): ";
+    std::cin >> userInput;
+    std::cout << std::endl;
+
+    video = cv::VideoCapture(userInput);
+    framerate = video.get(5);
     totalFrameCount = video.get(7);
+
+    system("CLS");
+
+    std::cout << "Enter the amount of unqiue load screens that this video has: ";
+    std::cin >> userInput;
+
+    uniqueLoadScreenCount = std::stoi(userInput);
 
     cv::Mat mat;
     double num = 0.0;
-
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < uniqueLoadScreenCount; i++)
     {
         loadFrameCrops.push_back(mat);
         framesForDifference.push_back(mat);
         maxVals.push_back(num);
     }
 
-    loadPatterns[0] >> loadFrameCrops[0];
-    loadPatterns[1] >> loadFrameCrops[1];
-    loadPatterns[2] >> loadFrameCrops[2];
+    system("CLS");
+
+    std::cout << "Enter the timestamps of the different kind of load screens you would like to capture." << std::endl;
+    std::cout << "Format your input like this: 'hh mm ss'. Example: '01 15 56'. The load screen displayed at 01h15m56s will be captured." << std::endl;
+
+    for (int i = 0; i < uniqueLoadScreenCount; i++)
+    {
+        std::cout << "Load screen timestamp: ";
+        std::getline(std::cin >> std::ws, userInput);
+
+        if (userInput.compare("END") != 0)
+        {
+            std::string num;
+            std::stringstream ss(userInput);
+            std::vector<std::string> tokens;
+            while (ss >> num)
+            {
+                tokens.push_back(num);
+            }
+
+            int seconds = std::stoi(tokens[2]);
+            int minutes = std::stoi(tokens[1]);
+            int hours = std::stoi(tokens[0]);
+
+            int totalSeconds = seconds + (minutes * 60) + (hours * 3600);
+
+            video.set(cv::CAP_PROP_POS_MSEC, totalSeconds * 1000);
+            cv::Mat frame;
+            video >> frame;
+            cv::Mat frameCrop = frame(cv::Rect(64, 649, 81, 19));
+            loadFrameCrops[i] = frameCrop;
+        }
+    }
+
+    video.set(cv::CAP_PROP_POS_MSEC, 0);
 }
 
 void LoadRemover::promptDebugMode()
@@ -43,8 +85,9 @@ void LoadRemover::promptDebugMode()
     std::cout << "Debug mode will:" << std::endl;
     std::cout << " - Show a video player that is pausable/unpausable with the 'P' key " << std::endl;
     std::cout << " - Pause on the frame after a load screen has finished" << std::endl;
-    std::cout << "      - If it suddenly pauses when there was no recent load, then " << std::endl;
-    std::cout << "        it has incorrectly detected a frame as a load " << std::endl << std::endl;
+    std::cout << "      - If it pauses when the previous frame wasn't a load: it has incorrectly detected a frame as a load" << std::endl;
+    std::cout << "      - If it pauses during a load: it isn't detecting a load frame as a load " << std::endl;
+    std::cout << " - Output text when it detects a frame as a load" << std::endl << std::endl;
 
     std::string userInput;
     while (userInput.compare("Y") != 0 && userInput.compare("N"))
@@ -70,19 +113,30 @@ void LoadRemover::iterateFrames()
         }
         videoFrameCrop = videoFrame(cv::Rect(64, 649, 81, 19));
 
-        absdiff(videoFrameCrop, loadFrameCrops[0], framesForDifference[0]);
-        absdiff(videoFrameCrop, loadFrameCrops[1], framesForDifference[1]);
-        absdiff(videoFrameCrop, loadFrameCrops[2], framesForDifference[2]);
+        for (int i = 0; i < uniqueLoadScreenCount; i++)
+        {
+            absdiff(videoFrameCrop, loadFrameCrops[i], framesForDifference[i]);
+            minMaxLoc(framesForDifference[i], NULL, &maxVals[i]);
+        }
 
-        minMaxLoc(framesForDifference[0], NULL, &maxVals[0]);
-        minMaxLoc(framesForDifference[1], NULL, &maxVals[1]);
-        minMaxLoc(framesForDifference[2], NULL, &maxVals[2]);
+        double threshold = 80.0;
+        double lowestMaxVal = *std::min_element(std::begin(maxVals), std::end(maxVals));
 
-        if (maxVals[0] < 100.0 || maxVals[1] < 100 || maxVals[2] < 100)
+        if (lowestMaxVal < threshold)
         {
             loadingFrameCount++;
             printPercentageDone();
             lastFrameWasLoad = true;
+
+            if (debugMode)
+            {
+                std::cout << "LOAD " << loadingFrameCount << " | ";
+                for (double num : maxVals)
+                {
+                    std::cout << num << " ";
+                }
+                std::cout << std::endl;
+            }
         }
 
         if (debugMode)
@@ -98,7 +152,7 @@ void LoadRemover::iterateFrames()
             {
                 while (cv::waitKey(1) != 'p');
             }
-            else if (lastFrameWasLoad && maxVals[0] >= 100.0 && maxVals[1] >= 100 && maxVals[2] >= 100)
+            else if (lastFrameWasLoad && lowestMaxVal >= threshold)
             {
                 lastFrameWasLoad = false;
                 while (cv::waitKey(1) != 'p');
@@ -124,15 +178,15 @@ void LoadRemover::printResultsAndDeleteVideos()
 {
     system("CLS");
 
-    int frameRate = video.get(5);
-    int milliseconds = (loadingFrameCount % frameRate) * (100.0 / frameRate);
-    int seconds = (loadingFrameCount / frameRate) % 60;
-    int minutes = (loadingFrameCount / frameRate) / 60;
+    int milliseconds = (loadingFrameCount % framerate) * (100.0 / framerate);
+    int seconds = (loadingFrameCount / framerate) % 60;
+    int minutes = (loadingFrameCount / framerate) / 60;
 
     video.release();
-    loadFrameCrops[0].release();
-    loadFrameCrops[1].release();
-    loadFrameCrops[2].release();
+    for (cv::Mat mat : loadFrameCrops)
+    {
+        mat.release();
+    }
     cv::destroyAllWindows();
 
     system("CLS");
