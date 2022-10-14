@@ -1,8 +1,11 @@
 #include "LoadRemover.hpp"
-#include "opencv2\highgui\highgui.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include <boost/filesystem/path.hpp>
 #include <iostream>
 #include <iomanip>
 #include <vector>
+#include <fstream>
+#include <filesystem>
 
 void LoadRemover::begin()
 {
@@ -15,11 +18,34 @@ void LoadRemover::begin()
 void LoadRemover::startSetup()
 {
     std::string userInput;
+    bool isValidInput = false;
 
-    std::cout << "Currently only supports 720p videos. Use a 60fps recording for better accuracy." << std::endl;
-    std::cout << "Enter the location of your video file (Example: 'D:\\Videos\\LoadRemover\\speedrun.mp4'): ";
-    std::cin >> userInput;
-    std::cout << std::endl;
+    std::fstream fileStream;
+    while (!isValidInput)
+    {
+        std::cout << "Path to video file (inlcuding file name): ";
+        std::getline(std::cin >> std::ws, userInput);
+
+        boost::filesystem::path videoPath(userInput);
+
+        fileStream.open(userInput);
+        
+        if (fileStream.fail())
+        {   
+            std::cout << "ERROR: File not found" << std::endl << std::endl;
+            fileStream.close();
+        }
+        else if (videoPath.extension().compare(std::string(".mp4")) != 0 && videoPath.extension().compare(std::string(".m4a")) != 0 && videoPath.extension().compare(std::string(".webm")) != 0)
+        {
+            std::cout << "ERROR: File type must be mp4, m4a, or webm" << std::endl << std::endl;
+            fileStream.close();
+        }
+        else
+        {
+            isValidInput = true;
+        }
+    }
+    isValidInput = false;
 
     video = cv::VideoCapture(userInput);
     framerate = video.get(5);
@@ -27,10 +53,34 @@ void LoadRemover::startSetup()
 
     system("CLS");
 
-    std::cout << "Enter the amount of unqiue load screens that this video has: ";
-    std::cin >> userInput;
+    while (!isValidInput)
+    {
+        std::cout << "Amount of different kinds of load screens: ";
+        std::getline(std::cin >> std::ws, userInput);
 
-    uniqueLoadScreenCount = std::stoi(userInput);
+        try
+        {
+            if (stoi(userInput) < 1 || stoi(userInput) > 99)
+            {
+                std::cout << "ERROR: Input must be >= 1 and <= 99" << std::endl << std::endl;
+            }
+            else if (!std::all_of(userInput.begin(), userInput.end(), ::isdigit))
+            {
+                std::cout << "ERROR: Input must only contain numbers" << std::endl << std::endl;
+            }
+            else
+            {
+                isValidInput = true;
+            }
+        }
+        catch (std::exception e)
+        {
+            std::cout << "ERROR: Input must be a number" << std::endl << std::endl;
+        }
+    }
+    isValidInput = false;
+
+    uniqueLoadScreenCount = stoi(userInput);
 
     cv::Mat mat;
     double num = 0.0;
@@ -43,37 +93,44 @@ void LoadRemover::startSetup()
 
     system("CLS");
 
-    std::cout << "Enter the timestamps of the different kind of load screens you would like to capture." << std::endl;
-    std::cout << "Format your input like this: 'hh mm ss'. Example: '01 15 56'. The load screen displayed at 01h15m56s will be captured." << std::endl;
-
     for (int i = 0; i < uniqueLoadScreenCount; i++)
     {
-        std::cout << "Load screen timestamp: ";
-        std::getline(std::cin >> std::ws, userInput);
-
-        if (userInput.compare("END") != 0)
+        while (!isValidInput)
         {
-            std::string num;
-            std::stringstream ss(userInput);
-            std::vector<std::string> tokens;
-            while (ss >> num)
+            std::cout << "Load screen timestamp (hhmmss): ";
+            std::getline(std::cin >> std::ws, userInput);
+
+            if (userInput.size() != 6)
             {
-                tokens.push_back(num);
+                std::cout << "ERROR: Timestamp length must equal 6" << std::endl << std::endl;
             }
-
-            int seconds = std::stoi(tokens[2]);
-            int minutes = std::stoi(tokens[1]);
-            int hours = std::stoi(tokens[0]);
-
-            int totalSeconds = seconds + (minutes * 60) + (hours * 3600);
-
-            video.set(cv::CAP_PROP_POS_MSEC, totalSeconds * 1000);
-            cv::Mat frame;
-            video >> frame;
-            cv::Mat frameCrop = frame(cv::Rect(64, 649, 81, 19));
-            loadFrameCrops[i] = frameCrop;
+            else
+            {
+                if (!std::all_of(userInput.begin(), userInput.end(), ::isdigit))
+                {
+                    std::cout << "ERROR: Timestamp must only contain numbers" << std::endl << std::endl;
+                }
+                else
+                {
+                    isValidInput = true;
+                }
+            }
         }
+        isValidInput = false;
+
+        int seconds = ((userInput[4] * 10) + userInput[5]) - 528;
+        int minutes = ((userInput[2] * 10) + userInput[3]) - 528;
+        int hours = ((userInput[0] * 10) + userInput[1]) - 528;
+        int totalSeconds = seconds + (minutes * 60) + (hours * 3600);
+
+        video.set(cv::CAP_PROP_POS_MSEC, totalSeconds * 1000);
+        cv::Mat frame;
+        video >> frame;
+        cv::Mat frameCrop = frame(cv::Rect(64, 649, 81, 19));
+        loadFrameCrops[i] = frameCrop;
     }
+
+    fileStream.close();
 
     video.set(cv::CAP_PROP_POS_MSEC, 0);
 }
@@ -82,18 +139,11 @@ void LoadRemover::promptDebugMode()
 {
     system("CLS");
 
-    std::cout << "Debug mode will:" << std::endl;
-    std::cout << " - Show a video player that is pausable/unpausable with the 'P' key " << std::endl;
-    std::cout << " - Pause on the frame after a load screen has finished" << std::endl;
-    std::cout << "      - If it pauses when the previous frame wasn't a load: it has incorrectly detected a frame as a load" << std::endl;
-    std::cout << "      - If it pauses during a load: it isn't detecting a load frame as a load " << std::endl;
-    std::cout << " - Output text when it detects a frame as a load" << std::endl << std::endl;
-
     std::string userInput;
     while (userInput.compare("Y") != 0 && userInput.compare("N"))
     {
-        std::cout << "Enable debug mode? (Y/N):";
-        std::cin >> userInput;
+        std::cout << "Enable debug mode? (Y/N): ";
+        std::getline(std::cin >> std::ws, userInput);
     }
 
     if (userInput.compare("Y") == 0)
