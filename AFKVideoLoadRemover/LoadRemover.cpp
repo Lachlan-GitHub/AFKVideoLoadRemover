@@ -15,6 +15,26 @@ void LoadRemover::begin()
     printResultsAndDeleteVideos();
 }
 
+cv::Point point1;
+cv::Point point2;
+void getMouseClickPosition(int event, int x, int y, int flags, void* userdata)
+{
+    if (event == cv::EVENT_LBUTTONDOWN)
+    {
+        if (point1.x == NULL)
+        {
+            point1.x = x;
+            point1.y = y;
+        }
+        else if (point2.x == NULL)
+        {
+            point2.x = x;
+            point2.y = y;
+            cv::destroyWindow("Area Selection");
+        }
+    }
+}
+
 void LoadRemover::startSetup()
 {
     std::string userInput;
@@ -48,6 +68,7 @@ void LoadRemover::startSetup()
     isValidInput = false;
 
     video = cv::VideoCapture(userInput);
+    resolution = video.get(4);
     framerate = video.get(5);
     totalFrameCount = video.get(7);
 
@@ -97,6 +118,8 @@ void LoadRemover::startSetup()
     {
         while (!isValidInput)
         {
+            system("CLS");
+
             std::cout << "Load screen timestamp (hhmmss): ";
             std::getline(std::cin >> std::ws, userInput);
 
@@ -126,7 +149,20 @@ void LoadRemover::startSetup()
         video.set(cv::CAP_PROP_POS_MSEC, totalSeconds * 1000);
         cv::Mat frame;
         video >> frame;
-        cv::Mat frameCrop = frame(cv::Rect(64, 649, 81, 19));
+
+        if (i == 0)
+        {
+            cv::namedWindow("Area Selection");
+            cv::setMouseCallback("Area Selection", getMouseClickPosition, this);
+            cv::imshow("Area Selection", frame);
+            cv::waitKey(0);
+            cropArea.x = point1.x;
+            cropArea.y = point1.y;
+            cropArea.width = point2.x - point1.x;
+            cropArea.height = point2.y - point1.y;
+        }
+
+        cv::Mat frameCrop = frame(cropArea);
         loadFrameCrops[i] = frameCrop;
     }
 
@@ -161,7 +197,7 @@ void LoadRemover::iterateFrames()
         {
             break;
         }
-        videoFrameCrop = videoFrame(cv::Rect(64, 649, 81, 19));
+        videoFrameCrop = videoFrame(cropArea);
 
         for (int i = 0; i < uniqueLoadScreenCount; i++)
         {

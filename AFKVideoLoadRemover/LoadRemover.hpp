@@ -12,6 +12,7 @@ public:
 	void iterateFrames();
 	void printPercentageDone();
 	void printResultsAndDeleteVideos();
+	void setSelection(int, int, int, int);
 
 private:
 	bool debugMode;
@@ -22,8 +23,10 @@ private:
 	std::vector<double> maxVals;
 	cv::Mat videoFrame;
 	cv::Mat videoFrameCrop;
+	cv::Rect cropArea;
 	int uniqueLoadScreenCount;
 	int loadingFrameCount;
+	int resolution;
 	int framerate;
 	int totalFrameCount;
 	int completionPercentage;
