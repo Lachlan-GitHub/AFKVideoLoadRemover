@@ -30,7 +30,7 @@ void getMouseClickPosition(int event, int x, int y, int flags, void* userdata)
         {
             point2.x = x;
             point2.y = y;
-            cv::destroyWindow("Area Selection");
+            cv::destroyAllWindows();
         }
     }
     else if (event == cv::EVENT_RBUTTONDOWN)
@@ -47,7 +47,9 @@ void LoadRemover::startSetup()
     std::fstream fileStream;
     while (!isValidInput)
     {
-        std::cout << "Path to video file (inlcuding file name): ";
+        std::cout << "Please refer to the user guide to learn how to use this load remover" << std::endl << std::endl;
+
+        std::cout << "Path to video file: ";
         std::getline(std::cin >> std::ws, userInput);
 
         boost::filesystem::path videoPath(userInput);
@@ -322,4 +324,6 @@ void LoadRemover::printResultsAndDeleteVideos()
     std::cout << "Load frames: " << loadingFrameCount << std::endl;
     std::cout << minutes << "m " << seconds << "s " << milliseconds << "ms  of load screens" << std::endl;
     std::cout << "--------------------------------------------------------------------------" << std::endl;
+
+    std::system("pause");
 }
