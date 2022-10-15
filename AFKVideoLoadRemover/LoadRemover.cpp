@@ -9,10 +9,10 @@
 
 void LoadRemover::begin()
 {
-    startSetup();
-    promptDebugMode();
-    iterateFrames();
-    printResultsAndDeleteVideos();
+    LoadRemover::startSetup();
+    LoadRemover::promptDebugMode();
+    LoadRemover::iterateFrames();
+    LoadRemover::printResultsAndDeleteVideos();
 }
 
 cv::Point point1;
@@ -32,6 +32,10 @@ void getMouseClickPosition(int event, int x, int y, int flags, void* userdata)
             point2.y = y;
             cv::destroyWindow("Area Selection");
         }
+    }
+    else if (event == cv::EVENT_RBUTTONDOWN)
+    {
+        cv::destroyAllWindows();
     }
 }
 
@@ -72,7 +76,7 @@ void LoadRemover::startSetup()
     framerate = video.get(5);
     totalFrameCount = video.get(7);
 
-    system("CLS");
+    std::system("CLS");
 
     while (!isValidInput)
     {
@@ -81,7 +85,7 @@ void LoadRemover::startSetup()
 
         try
         {
-            if (stoi(userInput) < 1 || stoi(userInput) > 99)
+            if (std::stoi(userInput) < 1 || std::stoi(userInput) > 99)
             {
                 std::cout << "ERROR: Input must be >= 1 and <= 99" << std::endl << std::endl;
             }
@@ -101,7 +105,7 @@ void LoadRemover::startSetup()
     }
     isValidInput = false;
 
-    uniqueLoadScreenCount = stoi(userInput);
+    uniqueLoadScreenCount = std::stoi(userInput);
 
     cv::Mat mat;
     double num = 0.0;
@@ -112,58 +116,98 @@ void LoadRemover::startSetup()
         maxVals.push_back(num);
     }
 
-    system("CLS");
+    std::system("CLS");
 
-    for (int i = 0; i < uniqueLoadScreenCount; i++)
+    bool isConfirmedCorrect = false;
+    while (!isConfirmedCorrect)
     {
-        while (!isValidInput)
+        for (int i = 0; i < uniqueLoadScreenCount; i++)
         {
-            system("CLS");
-
-            std::cout << "Load screen timestamp (hhmmss): ";
-            std::getline(std::cin >> std::ws, userInput);
-
-            if (userInput.size() != 6)
+            while (!isValidInput)
             {
-                std::cout << "ERROR: Timestamp length must equal 6" << std::endl << std::endl;
-            }
-            else
-            {
-                if (!std::all_of(userInput.begin(), userInput.end(), ::isdigit))
+                std::system("CLS");
+
+                std::cout << "Load screen timestamp (hhmmss): ";
+                std::getline(std::cin >> std::ws, userInput);
+
+                if (userInput.size() != 6)
                 {
-                    std::cout << "ERROR: Timestamp must only contain numbers" << std::endl << std::endl;
+                    std::cout << "ERROR: Timestamp length must equal 6" << std::endl << std::endl;
                 }
                 else
                 {
-                    isValidInput = true;
+                    if (!std::all_of(userInput.begin(), userInput.end(), ::isdigit))
+                    {
+                        std::cout << "ERROR: Timestamp must only contain numbers" << std::endl << std::endl;
+                    }
+                    else
+                    {
+                        isValidInput = true;
+                    }
                 }
             }
+            isValidInput = false;
+
+            int seconds = ((userInput[4] * 10) + userInput[5]) - 528;
+            int minutes = ((userInput[2] * 10) + userInput[3]) - 528;
+            int hours = ((userInput[0] * 10) + userInput[1]) - 528;
+            int totalSeconds = seconds + (minutes * 60) + (hours * 3600);
+
+            video.set(cv::CAP_PROP_POS_MSEC, totalSeconds * 1000);
+            cv::Mat frame;
+            video >> frame;
+
+            if (i == 0)
+            {
+                cv::namedWindow("Area Selection");
+                cv::setMouseCallback("Area Selection", getMouseClickPosition, NULL);
+                cv::imshow("Area Selection", frame);
+                cv::waitKey(0);
+                cropArea.x = point1.x;
+                cropArea.y = point1.y;
+                cropArea.width = point2.x - point1.x;
+                cropArea.height = point2.y - point1.y;
+            }
+
+            cv::Mat frameCrop = frame(cropArea);
+            loadFrameCrops[i] = frameCrop;
         }
-        isValidInput = false;
 
-        int seconds = ((userInput[4] * 10) + userInput[5]) - 528;
-        int minutes = ((userInput[2] * 10) + userInput[3]) - 528;
-        int hours = ((userInput[0] * 10) + userInput[1]) - 528;
-        int totalSeconds = seconds + (minutes * 60) + (hours * 3600);
+        std::system("CLS");
 
-        video.set(cv::CAP_PROP_POS_MSEC, totalSeconds * 1000);
-        cv::Mat frame;
-        video >> frame;
+        std::cout << "Your frame selections will be shown. Close each one to move onto the next and then you will be asked if they are correct. Press enter to proceed: ";
+        std::cin.ignore();
 
-        if (i == 0)
+        for (int i = 0; i < loadFrameCrops.size(); i++)
         {
-            cv::namedWindow("Area Selection");
-            cv::setMouseCallback("Area Selection", getMouseClickPosition, this);
-            cv::imshow("Area Selection", frame);
+            std::string windowName = std::to_string(i + 1) + "/" + std::to_string(loadFrameCrops.size());
+
+            cv::namedWindow(windowName);
+            cv::setMouseCallback(windowName, getMouseClickPosition, NULL);
+            cv::imshow(windowName, loadFrameCrops[i]);
+
+            std::system("CLS");
+
             cv::waitKey(0);
-            cropArea.x = point1.x;
-            cropArea.y = point1.y;
-            cropArea.width = point2.x - point1.x;
-            cropArea.height = point2.y - point1.y;
         }
 
-        cv::Mat frameCrop = frame(cropArea);
-        loadFrameCrops[i] = frameCrop;
+        std::system("CLS");
+
+        while (userInput.compare("Y") != 0 && userInput.compare("N"))
+        {
+            std::cout << "Proceed with these selections? (Y/N): ";
+            std::getline(std::cin >> std::ws, userInput);
+        }
+
+        if (userInput.compare("Y") == 0)
+        {
+            isConfirmedCorrect = true;
+        }
+        else
+        {
+            point1.x = NULL;
+            point2.x = NULL;
+        }
     }
 
     fileStream.close();
@@ -173,7 +217,7 @@ void LoadRemover::startSetup()
 
 void LoadRemover::promptDebugMode()
 {
-    system("CLS");
+    std::system("CLS");
 
     std::string userInput;
     while (userInput.compare("Y") != 0 && userInput.compare("N"))
@@ -201,8 +245,8 @@ void LoadRemover::iterateFrames()
 
         for (int i = 0; i < uniqueLoadScreenCount; i++)
         {
-            absdiff(videoFrameCrop, loadFrameCrops[i], framesForDifference[i]);
-            minMaxLoc(framesForDifference[i], NULL, &maxVals[i]);
+            cv::absdiff(videoFrameCrop, loadFrameCrops[i], framesForDifference[i]);
+            cv::minMaxLoc(framesForDifference[i], NULL, &maxVals[i]);
         }
 
         double threshold = 80.0;
@@ -211,7 +255,17 @@ void LoadRemover::iterateFrames()
         if (lowestMaxVal < threshold)
         {
             loadingFrameCount++;
-            printPercentageDone();
+            
+            int currentFrameCount = video.get(1);
+
+            if (currentFrameCount / (totalFrameCount / 100) != completionPercentage)
+            {
+                system("CLS");
+
+                completionPercentage = currentFrameCount / (totalFrameCount / 100);
+                std::cout << completionPercentage << "%" << std::endl;
+            }
+
             lastFrameWasLoad = true;
 
             if (debugMode)
@@ -227,7 +281,7 @@ void LoadRemover::iterateFrames()
 
         if (debugMode)
         {
-            imshow("Debug Output", videoFrame);
+            cv::imshow("Debug Output", videoFrame);
 
             char c = cv::waitKey(1);
             if (c == 27)
@@ -247,22 +301,9 @@ void LoadRemover::iterateFrames()
     }
 }
 
-void LoadRemover::printPercentageDone()
-{
-    int currentFrameCount = video.get(1);
-
-    if (currentFrameCount / (totalFrameCount / 100) != completionPercentage)
-    {
-        system("CLS");
-
-        completionPercentage = currentFrameCount / (totalFrameCount / 100);
-        std::cout << completionPercentage << "%" << std::endl;
-    }
-}
-
 void LoadRemover::printResultsAndDeleteVideos()
 {
-    system("CLS");
+    std::system("CLS");
 
     int milliseconds = (loadingFrameCount % framerate) * (100.0 / framerate);
     int seconds = (loadingFrameCount / framerate) % 60;
@@ -275,7 +316,7 @@ void LoadRemover::printResultsAndDeleteVideos()
     }
     cv::destroyAllWindows();
 
-    system("CLS");
+    std::system("CLS");
 
     std::cout << "--------------------------------------------------------------------------" << std::endl;
     std::cout << "Load frames: " << loadingFrameCount << std::endl;

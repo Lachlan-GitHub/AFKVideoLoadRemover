@@ -10,9 +10,7 @@ public:
 	void startSetup();
 	void promptDebugMode();
 	void iterateFrames();
-	void printPercentageDone();
 	void printResultsAndDeleteVideos();
-	void setSelection(int, int, int, int);
 
 private:
 	bool debugMode;
