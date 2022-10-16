@@ -164,7 +164,7 @@ void LoadRemover::startSetup()
                 cv::namedWindow("Area Selection");
                 cv::setMouseCallback("Area Selection", getMouseClickPosition, NULL);
                 cv::imshow("Area Selection", frame);
-                cv::waitKey(0);
+                cv::waitKey();
                 cropArea.x = point1.x;
                 cropArea.y = point1.y;
                 cropArea.width = point2.x - point1.x;
@@ -177,7 +177,7 @@ void LoadRemover::startSetup()
 
         std::system("CLS");
 
-        std::cout << "Your frame selections will be shown. Close each one to move onto the next and then you will be asked if they are correct. Press enter to proceed: ";
+        std::cout << "Your frame selections will be shown. Close each one to move onto the next. Press enter to proceed: ";
         std::cin.ignore();
 
         for (int i = 0; i < loadFrameCrops.size(); i++)
