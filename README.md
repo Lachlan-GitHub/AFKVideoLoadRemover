@@ -11,4 +11,4 @@ The AFK Video Load Remover allows you to remove loads from a video file of a spe
 ### For Developers
 1. [Installing OpenCV](https://youtu.be/trXs2r6xSnI)
 2. [Installing Boost](https://youtu.be/TEF5U1AaIV8)
-3. Download this repository and open AFKVideoLoadRemover.sln inside Visual Studio
+3. Clone this repository and open AFKVideoLoadRemover.sln inside Visual Studio
