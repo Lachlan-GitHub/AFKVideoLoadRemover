@@ -1,5 +1,5 @@
 # AFKVideoLoadRemover
-The AFK Video Load Remover allows you to remove loads from a video file of a speedrun with almost zero input. This was built to accomodate users that find the [Video Auto Splitter](https://github.com/ROMaster2/LiveSplit.VideoAutoSplit) to be too demanding on their CPU while they are currently running demanding applications and/or streaming. It also allows [Speedrun.com](https://www.speedrun.com/) leaderboard moderators to quickly calculate loadless times on runs that were submitted without one. Just like the other Video Auto Splitter, this currently only works for games that have static symbols to scan for in their loading screens.
+The AFK Video Load Remover allows you to find a time-without-loads from a video file of a speedrun with almost zero input. This was built to accomodate users that find the [Video Auto Splitter](https://github.com/ROMaster2/LiveSplit.VideoAutoSplit) to be too demanding on their CPU while they are currently running demanding applications and/or streaming. It also allows [Speedrun.com](https://www.speedrun.com/) leaderboard moderators to quickly calculate loadless times on runs that were submitted without one. Just like the other Video Auto Splitter, this currently only works for games that have static symbols to scan for in their loading screens.
 
 ## Installation
 ### For Users
